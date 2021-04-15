@@ -183,7 +183,7 @@ def MulMatrixVector(InversedMat, b_vector):
     return result
 
 
-def UMatrix(matrix):
+def UMatrix(matrix,vector):
     """
     :param matrix: Matrix nxn
     :return:Disassembly into a  U matrix
@@ -192,6 +192,8 @@ def UMatrix(matrix):
     U = MakeIMatrix(len(matrix), len(matrix))
     # loop for each row
     for i in range(len(matrix[0])):
+        # pivoting process
+        matrix, vector = RowXchageZero(matrix, vector)
         for j in range(i + 1, len(matrix)):
             elementary = MakeIMatrix(len(matrix[0]), len(matrix))
             # Finding the M(ij) to reset the organs under the pivot
@@ -202,7 +204,7 @@ def UMatrix(matrix):
     return U
 
 
-def LMatrix(matrix):
+def LMatrix(matrix,vector):
     """
        :param matrix: Matrix nxn
        :return:Disassembly into a  L matrix
@@ -211,6 +213,8 @@ def LMatrix(matrix):
     L = MakeIMatrix(len(matrix), len(matrix))
     # loop for each row
     for i in range(len(matrix[0])):
+        # pivoting process
+        matrix, vector = RowXchageZero(matrix, vector)
         for j in range(i + 1, len(matrix)):
             elementary = MakeIMatrix(len(matrix[0]), len(matrix))
             # Finding the M(ij) to reset the organs under the pivot
@@ -220,6 +224,30 @@ def LMatrix(matrix):
             matrix = MultiplyMatrix(elementary, matrix)
 
     return L
+
+
+def RowXchageZero(matrix,vector):
+    """
+      Function for replacing rows with both a matrix and a vector
+      :param matrix: Matrix nxn
+      :param vector: Vector n
+      :return: Replace rows after a pivoting process
+      """
+
+    for i in range(len(matrix)):
+        for j in range(i, len(matrix)):
+            # The pivot member is not zero
+            if matrix[i][i] == 0:
+                temp = matrix[j]
+                temp_b = vector[j]
+                matrix[j] = matrix[i]
+                vector[j] = vector[i]
+                matrix[i] = temp
+                vector[i] = temp_b
+
+
+    return [matrix, vector]
+
 
 
 def SolveLU(matrix, vector):
@@ -246,7 +274,7 @@ def Cond(matrix, invert):
 
 
 
-matrixA = [[1, 2, 3], [4 ,5, 6], [7, 8, 9]]
+matrixA = [[1, 0, 3], [0, 2, 1], [1, 0, -2]]
 vectorb = [[10], [20], [30]]
 detA = Determinant(matrixA, 1)
 print("\nMatrix A: \n")
@@ -263,12 +291,10 @@ else:
     print("Singular Matrix\n")
     print("\nLU Decomposition \n")
     print("Matrix U: \n")
-    PrintMatrix(UMatrix(matrixA))
+    PrintMatrix(UMatrix(matrixA,vectorb))
     print("\nMatrix L: \n")
-    PrintMatrix(LMatrix(matrixA))
+    PrintMatrix(LMatrix(matrixA,vectorb))
     #print("\nSolve Ax = b: \n")
     #PrintMatrix(SolveLU(matrixA, vectorb))
     print("\nMatrix A=LU: \n")
-    PrintMatrix(MultiplyMatrix(LMatrix(matrixA),UMatrix(matrixA)))
-
-
+    PrintMatrix(MultiplyMatrix(LMatrix(matrixA,vectorb),UMatrix(matrixA,vectorb)))
